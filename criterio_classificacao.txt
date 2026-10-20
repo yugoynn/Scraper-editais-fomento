@@ -1,0 +1,37 @@
+CRITÉRIO DE CLASSIFICAÇÃO - V19
+
+NEGOCIOS:
+- Empresa, startup, empreendedor ou setor produtivo pode participar/submeter.
+- ICT / ICTI pode participar/submeter.
+- Centro de Inovação pode participar/submeter.
+- Pesquisador + empresa = NEGOCIOS.
+- Pesquisador + ICT = NEGOCIOS.
+
+ACADEMICO:
+Somente quando a oportunidade for exclusivamente acadêmica/universitária, por exemplo pesquisadores, docentes, estudantes, grupos de pesquisa, universidades públicas/estaduais/federais, Institutos Federais ou instituições públicas/federais/estaduais de ensino, sem empresa/ICT elegível no mesmo público.
+
+OUTRO:
+- Seleção individual de bolsistas.
+- Candidatos, profissionais, pessoas físicas ou servidores.
+- Casos em que não há prova de empresa/ICT elegível e que também não são uma chamada exclusivamente acadêmica.
+
+REGRA MAIS IMPORTANTE:
+A classificação deve identificar QUEM PODE PARTICIPAR/SUBMETER. A instituição parceira não define a classe. Exemplo: CIASC ser uma ICT não transforma uma seleção de bolsistas em NEGOCIOS.
+
+PROCESSAMENTO DA IA:
+- FAPESC NEGOCIOS: chama qwen3.5:9b para objetivo/apoio e resumo.
+- FAPESC ACADEMICO: não chama Qwen e deixa resumo vazio.
+- FAPESC OUTRO: não chama Qwen e deixa resumo vazio.
+- SEBRAE: mantém reescrita de resumo pelo qwen3.5:9b.
+
+AMOSTRA TESTADA (16 EDITAIS):
+NEGOCIOS = 5
+ACADEMICO = 3
+OUTRO = 8
+
+
+FONTES JSON V19:
+- BNDES, FAPEAM, FAPEMIG, FAPPR, Petrobras e Rota do Fomento: Qwen classifica todos os itens.
+- Prazo vem do JSON do scraper, sem chamada da IA para data.
+- Resumo com Qwen somente para NEGOCIOS.
+- Os scrapers dessas fontes geram somente JSON.

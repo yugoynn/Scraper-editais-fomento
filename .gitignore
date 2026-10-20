@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.env
+
+# Dados gerados pelos coletores (recriados a cada execução)
+dados/
+
+# Música de fundo (adicione a sua localmente; veja music/LEIA-ME.md)
+music/*.mp3
+music/*.ogg
+music/*.wav
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

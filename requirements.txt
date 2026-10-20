@@ -1,0 +1,6 @@
+Flask
+requests
+beautifulsoup4
+pymupdf4llm
+XlsxWriter
+playwright
