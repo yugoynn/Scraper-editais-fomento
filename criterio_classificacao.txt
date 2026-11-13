@@ -35,3 +35,13 @@ FONTES JSON V19:
 - Prazo vem do JSON do scraper, sem chamada da IA para data.
 - Resumo com Qwen somente para NEGOCIOS.
 - Os scrapers dessas fontes geram somente JSON.
+
+
+MARCAÇÃO DE STARTUPS (coluna "Startups" da planilha):
+- Complementa NEGOCIOS/ACADEMICO/OUTRO; não substitui a classificação.
+- Todo edital que menciona startup/startups/start-up no título, resumo,
+  público-alvo, evidência da classificação, perfil ou objetivo recebe "Startups".
+- Menções negadas ("não são startups", "vedada a participação de startups",
+  "exceto startups") não contam.
+- O nome da fonte ("Sebrae Startups") e o conteúdo bruto das páginas não contam.
+- Calculada na exportação (services/excel.py), sem chamar o Qwen.

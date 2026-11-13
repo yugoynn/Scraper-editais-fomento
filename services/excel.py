@@ -53,6 +53,67 @@ def normalizar_url(valor):
 def url_clicavel(valor):
     return bool(re.match(r"^https?://", str(valor or ""), re.I))
 
+
+# ============================================================
+# MARCAÇÃO DE STARTUPS
+# ============================================================
+#
+# Complementa a classificação NEGOCIOS/ACADEMICO/OUTRO: todo edital que
+# menciona startups no título, resumo, público-alvo ou evidência da IA recebe
+# "Startups" na coluna própria da planilha. Roda na exportação, então vale
+# também para editais já analisados (não precisa rodar o Qwen de novo).
+#
+# O nome da fonte ("Sebrae Startups") e o conteúdo bruto das páginas
+# (menus, rodapés) NÃO são considerados, para evitar falsos positivos.
+
+ROTULO_STARTUP = "Startups"
+
+TERMO_STARTUP = re.compile(r"\bstart[\s-]?ups?\b", re.IGNORECASE)
+
+# Menção negada logo antes do termo, ex.: "(não são empresas, startups ou
+# pesquisadores elegíveis)" ou "vedada a participação de startups".
+NEGACAO_ANTES_STARTUP = re.compile(
+    r"(?:\bn[aã]o\s+(?:s[aã]o|[eé]|ser[aã]o|podem|pode|poder[aã]o|"
+    r"inclui|incluem|aceita|aceitam|contempla|contemplam|abrange|abrangem)\b"
+    r"|\bexceto\b|\bvedad[ao]s?\b|\bexclu[ií]d[ao]s?\b|\bsalvo\b)"
+    r"[^.;:()\n]{0,80}$",
+    re.IGNORECASE,
+)
+
+CAMPOS_TEXTO_STARTUP = (
+    "titulo",
+    "resumo",
+    "publico_alvo",
+    "publico_elegivel",
+    "justificativa_classificacao",
+    "perfil",
+    "objetivo",
+    "apoio_oferecido",
+)
+
+
+def texto_para_startup(item):
+    partes = [item.get(campo) for campo in CAMPOS_TEXTO_STARTUP]
+
+    entrada = item.get("entrada_ia")
+    if isinstance(entrada, dict):
+        partes.extend([entrada.get("perfil"), entrada.get("objetivo")])
+
+    return "\n".join(str(parte) for parte in partes if parte)
+
+
+def menciona_startup(texto):
+    texto = str(texto or "")
+    for achado in TERMO_STARTUP.finditer(texto):
+        antes = texto[max(0, achado.start() - 120):achado.start()]
+        if not NEGACAO_ANTES_STARTUP.search(antes):
+            return True
+    return False
+
+
+def rotulo_startup(item):
+    return ROTULO_STARTUP if menciona_startup(texto_para_startup(item)) else ""
+
 def carregar_json(caminho):
     if not caminho.exists():
         return []
@@ -86,6 +147,7 @@ def preparar_fapesc():
             "prazo_submissao": edital.get("prazo_submissao", ""),
             "resumo": edital.get("resumo", ""),
             "classificacao": edital.get("classificacao", ""),
+            "startups": rotulo_startup(edital),
             "setores": edital.get("setores", ""),
             "publico_alvo": edital.get("publico_alvo", ""),
             "site": edital.get("site", "FAPESC"),
@@ -129,6 +191,7 @@ def preparar_sebrae():
             "prazo_submissao": prazo,
             "resumo": item.get("resumo", ""),
             "classificacao": item.get("classificacao", "") if analisado else "",
+            "startups": rotulo_startup(item),
             "setores": item.get("setores", "") if analisado else "",
             "publico_alvo": item.get("publico_alvo", "") if analisado else "",
             "site": item.get("site", "Sebrae Startups"),
@@ -175,6 +238,7 @@ def preparar_finep():
             "prazo_submissao": prazo,
             "resumo": resumo,
             "classificacao": item.get("classificacao", "") if analisado else "",
+            "startups": rotulo_startup(item),
             "setores": item.get("setores", "") if analisado else "",
             "publico_alvo": item.get("publico_alvo", "") if analisado else "",
             "site": item.get("site", "FINEP"),
@@ -222,6 +286,7 @@ def preparar_fapesp():
             "prazo_submissao": prazo,
             "resumo": resumo,
             "classificacao": classificacao,
+            "startups": rotulo_startup(item),
             "setores": item.get("setores", "") if analisado else "",
             "publico_alvo": publico,
             "site": item.get("site", "FAPESP"),
@@ -274,6 +339,7 @@ def preparar_fonte_json(chave):
             "prazo_submissao": prazo,
             "resumo": resumo,
             "classificacao": classificacao,
+            "startups": rotulo_startup(item),
             "setores": item.get("setores", "") if analisado else "",
             "publico_alvo": publico,
             "site": item.get("site", nome_padrao),
@@ -374,11 +440,21 @@ def exportar_excel(fonte="todos", progresso=None):
         "valign": "top",
     })
 
+    formato_startup = workbook.add_format({
+        "bold": True,
+        "font_color": "#7C2D12",
+        "bg_color": "#FFEDD5",
+        "border": 1,
+        "valign": "top",
+        "align": "center",
+    })
+
     colunas = [
         "Título",
         "Prazo de submissão",
         "Resumo",
         "Classificação",
+        "Startups",
         "Setores",
         "Público-alvo",
         "Fonte",
@@ -395,21 +471,25 @@ def exportar_excel(fonte="todos", progresso=None):
         worksheet.write(linha, 1, edital.get("prazo_submissao", ""), formato_centro)
         worksheet.write(linha, 2, edital.get("resumo", ""), formato_texto)
         worksheet.write(linha, 3, edital.get("classificacao", ""), formato_centro)
-        worksheet.write(linha, 4, edital.get("setores", ""), formato_texto)
-        worksheet.write(linha, 5, edital.get("publico_alvo", ""), formato_texto)
-        worksheet.write(linha, 6, edital.get("site", ""), formato_centro)
-        worksheet.write(linha, 7, edital.get("data_coleta", ""), formato_centro)
+
+        startups = edital.get("startups", "")
+        worksheet.write(linha, 4, startups, formato_startup if startups else formato_centro)
+
+        worksheet.write(linha, 5, edital.get("setores", ""), formato_texto)
+        worksheet.write(linha, 6, edital.get("publico_alvo", ""), formato_texto)
+        worksheet.write(linha, 7, edital.get("site", ""), formato_centro)
+        worksheet.write(linha, 8, edital.get("data_coleta", ""), formato_centro)
 
         pagina = normalizar_url(edital.get("pagina_edital", ""))
         # Salva a URL VISÍVEL como texto puro. write_string evita que o
         # XlsxWriter converta automaticamente a URL em hyperlink clicável.
-        worksheet.write_string(linha, 8, pagina, formato_texto)
+        worksheet.write_string(linha, 9, pagina, formato_texto)
 
         pdf = normalizar_url(edital.get("pdf_url", ""))
         if url_clicavel(pdf):
-            worksheet.write_url(linha, 9, pdf, formato_link, "Abrir edital")
+            worksheet.write_url(linha, 10, pdf, formato_link, "Abrir edital")
         else:
-            worksheet.write(linha, 9, pdf, formato_texto)
+            worksheet.write(linha, 10, pdf, formato_texto)
 
         if progresso:
             progresso(
@@ -425,12 +505,13 @@ def exportar_excel(fonte="todos", progresso=None):
     worksheet.set_column("B:B", 22)   # Prazo de submissão
     worksheet.set_column("C:C", 58)   # Resumo
     worksheet.set_column("D:D", 18)   # Classificação
-    worksheet.set_column("E:E", 26)   # Setores
-    worksheet.set_column("F:F", 45)   # Público-alvo
-    worksheet.set_column("G:G", 18)   # Fonte
-    worksheet.set_column("H:H", 22)   # Data de coleta
-    worksheet.set_column("I:I", 58)   # Página do edital
-    worksheet.set_column("J:J", 18)   # PDF do edital
+    worksheet.set_column("E:E", 14)   # Startups
+    worksheet.set_column("F:F", 26)   # Setores
+    worksheet.set_column("G:G", 45)   # Público-alvo
+    worksheet.set_column("H:H", 18)   # Fonte
+    worksheet.set_column("I:I", 22)   # Data de coleta
+    worksheet.set_column("J:J", 58)   # Página do edital
+    worksheet.set_column("K:K", 18)   # PDF do edital
     worksheet.set_row(0, 30)
     worksheet.freeze_panes(1, 0)
     worksheet.autofilter(0, 0, len(linhas), len(colunas) - 1)

@@ -23,7 +23,7 @@ O painel web tem quatro etapas, cada uma com telemetria ao vivo:
 | **Coletor** | Escolha as fontes e rode a coleta. Sites estáticos usam `requests` + `BeautifulSoup`; sites que dependem de JavaScript (filtros, cards dinâmicos) usam **Playwright** com um navegador real. Há cache para não baixar de novo o que já foi coletado. |
 | **Markdown** | Os PDFs dos editais da FAPESC são convertidos em Markdown com `pymupdf4llm`, deixando o texto pronto para a IA. |
 | **IA** | Um modelo local (Qwen 3.5 9B no Ollama) identifica **quem pode submeter**, classifica o edital, extrai público-alvo e prazo, marca setores e escreve um resumo curto. Nada é enviado para APIs externas. |
-| **Exportar** | Gera `editais_fomento.xlsx` com título, prazo, resumo, classificação, setores, público-alvo, fonte, data de coleta e links para a página e o PDF do edital. |
+| **Exportar** | Gera `editais_fomento.xlsx` com título, prazo, resumo, classificação, marcação de startups, setores, público-alvo, fonte, data de coleta e links para a página e o PDF do edital. |
 
 ![Painel da IA](docs/img/painel-ia.png)
 
@@ -49,6 +49,8 @@ A regra central é identificar **quem pode participar/submeter**, não quem é a
 - **NEGÓCIOS**: empresas, startups, ICTs ou centros de inovação podem submeter (inclui pesquisador + empresa e pesquisador + ICT).
 - **ACADÊMICO**: oportunidade exclusiva para pesquisadores, docentes, estudantes ou universidades.
 - **OUTRO**: seleção individual de bolsistas, pessoas físicas, servidores ou casos sem público empresarial claro.
+
+Além da classificação, a planilha tem a coluna **Startups**: todo edital que menciona startups no título, resumo, público-alvo ou evidência da classificação recebe a marca `Startups` (menções negadas, como "não são startups", são ignoradas). Essa marcação é feita na exportação, então vale também para editais já analisados.
 
 Para economizar processamento, o resumo com IA só é gerado para editais **NEGÓCIOS**. A classificação combina regras por palavras-chave com o modelo. O critério completo está em [`criterio_classificacao.txt`](criterio_classificacao.txt).
 
