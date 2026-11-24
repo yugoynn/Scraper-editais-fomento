@@ -464,8 +464,8 @@ def exportar_excel(fonte="todos", progresso=None):
         "PDF do edital",
     ]
 
-    # Faixa no topo indicando que a planilha foi exportada, com data/hora,
-    # total de editais e fontes incluídas. A tabela começa logo abaixo.
+    # Faixa no topo indicando a data em que a planilha foi exportada.
+    # A tabela começa logo abaixo.
     formato_exportado = workbook.add_format({
         "bold": True,
         "font_size": 12,
@@ -476,19 +476,13 @@ def exportar_excel(fonte="todos", progresso=None):
         "valign": "vcenter",
     })
 
-    exportado_em = datetime.now().strftime("%d/%m/%Y às %H:%M")
-    nomes_fontes = {"fapesc": "FAPESC", "sebrae": "Sebrae", "finep": "FINEP", "fapesp": "FAPESP"}
-    nomes_fontes.update({chave: cfg[2] for chave, cfg in FONTES_JSON_CONFIG.items()})
-    fontes_texto = ", ".join(nomes_fontes.get(s, s) for s in selecionadas)
-    texto_exportado = (
-        f"Planilha exportada em {exportado_em}  •  "
-        f"{total} editais  •  Fontes: {fontes_texto}"
-    )
+    exportado_em = datetime.now().strftime("%d/%m/%Y")
+    texto_exportado = f"Planilha exportada em {exportado_em}"
     worksheet.merge_range(0, 0, 0, len(colunas) - 1, texto_exportado, formato_exportado)
     worksheet.set_row(0, 26)
 
-    # Cabeçalho/rodapé de impressão também indicam a exportação.
-    worksheet.set_header(f"&L&\"Calibri,Bold\"Exportado em {exportado_em}&RPágina &P de &N")
+    # O cabeçalho de impressão também indica a data da exportação.
+    worksheet.set_header(f"&L&\"Calibri,Bold\"Exportado em {exportado_em}")
 
     LINHA_CABECALHO = 1
 
