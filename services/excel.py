@@ -1,5 +1,6 @@
 import json
 import re
+from datetime import datetime
 from pathlib import Path
 
 import xlsxwriter
@@ -463,10 +464,39 @@ def exportar_excel(fonte="todos", progresso=None):
         "PDF do edital",
     ]
 
-    for coluna, titulo in enumerate(colunas):
-        worksheet.write(0, coluna, titulo, formato_header)
+    # Faixa no topo indicando que a planilha foi exportada, com data/hora,
+    # total de editais e fontes incluídas. A tabela começa logo abaixo.
+    formato_exportado = workbook.add_format({
+        "bold": True,
+        "font_size": 12,
+        "font_color": "#0F172A",
+        "bg_color": "#E0F2FE",
+        "border": 1,
+        "align": "left",
+        "valign": "vcenter",
+    })
 
-    for linha, edital in enumerate(linhas, start=1):
+    exportado_em = datetime.now().strftime("%d/%m/%Y às %H:%M")
+    nomes_fontes = {"fapesc": "FAPESC", "sebrae": "Sebrae", "finep": "FINEP", "fapesp": "FAPESP"}
+    nomes_fontes.update({chave: cfg[2] for chave, cfg in FONTES_JSON_CONFIG.items()})
+    fontes_texto = ", ".join(nomes_fontes.get(s, s) for s in selecionadas)
+    texto_exportado = (
+        f"Planilha exportada em {exportado_em}  •  "
+        f"{total} editais  •  Fontes: {fontes_texto}"
+    )
+    worksheet.merge_range(0, 0, 0, len(colunas) - 1, texto_exportado, formato_exportado)
+    worksheet.set_row(0, 26)
+
+    # Cabeçalho/rodapé de impressão também indicam a exportação.
+    worksheet.set_header(f"&L&\"Calibri,Bold\"Exportado em {exportado_em}&RPágina &P de &N")
+
+    LINHA_CABECALHO = 1
+
+    for coluna, titulo in enumerate(colunas):
+        worksheet.write(LINHA_CABECALHO, coluna, titulo, formato_header)
+
+    for indice, edital in enumerate(linhas, start=1):
+        linha = LINHA_CABECALHO + indice
         worksheet.write(linha, 0, edital.get("titulo", ""), formato_texto)
         worksheet.write(linha, 1, edital.get("prazo_submissao", ""), formato_centro)
         worksheet.write(linha, 2, edital.get("resumo", ""), formato_texto)
@@ -493,9 +523,9 @@ def exportar_excel(fonte="todos", progresso=None):
 
         if progresso:
             progresso(
-                processados=linha,
+                processados=indice,
                 total=total,
-                exportados=linha,
+                exportados=indice,
                 erros=0,
                 item=edital.get("titulo", ""),
                 etapa="gerando_planilha",
@@ -512,9 +542,12 @@ def exportar_excel(fonte="todos", progresso=None):
     worksheet.set_column("I:I", 22)   # Data de coleta
     worksheet.set_column("J:J", 58)   # Página do edital
     worksheet.set_column("K:K", 18)   # PDF do edital
-    worksheet.set_row(0, 30)
-    worksheet.freeze_panes(1, 0)
-    worksheet.autofilter(0, 0, len(linhas), len(colunas) - 1)
+    worksheet.set_row(LINHA_CABECALHO, 30)
+    worksheet.freeze_panes(LINHA_CABECALHO + 1, 0)
+    worksheet.repeat_rows(0, LINHA_CABECALHO)
+    worksheet.autofilter(
+        LINHA_CABECALHO, 0, LINHA_CABECALHO + len(linhas), len(colunas) - 1
+    )
 
     workbook.close()
     return caminho
