@@ -489,6 +489,192 @@ def worker_exportar(job_id, fontes):
         finalizar_job(job_id, erro=erro)
 
 
+# ---------------------------------------------------------------------------
+# Processo completo: coleta -> Markdown (só FAPESC) -> IA.
+# É o que o botão INICIAR da interface dispara. Cada etapa publica seu estado
+# em job["etapas"] e suas quantidades em job["metricas"] (com prefixo por
+# etapa), para a tela mostrar em tempo real onde o processo está.
+# ---------------------------------------------------------------------------
+PESOS_PIPELINE = {"coleta": 40.0, "markdown": 15.0, "ia": 45.0}
+
+
+def worker_pipeline(job_id, fontes):
+    incluir_markdown = "fapesc" in fontes
+    etapas = ["coleta"] + (["markdown"] if incluir_markdown else []) + ["ia"]
+    peso_total = sum(PESOS_PIPELINE[e] for e in etapas)
+
+    # Faixa de progresso global (0-100) reservada para cada etapa.
+    faixas = {}
+    inicio = 0.0
+    for etapa in etapas:
+        fim = inicio + PESOS_PIPELINE[etapa] / peso_total * 100.0
+        faixas[etapa] = (inicio, fim)
+        inicio = fim
+
+    estado_etapas = {etapa: "pendente" for etapa in etapas}
+
+    def marcar_etapa(etapa, status):
+        estado_etapas[etapa] = status
+        atualizar_job(job_id, etapas=dict(estado_etapas))
+
+    def progresso_global(etapa, percentual_local):
+        ini, fim = faixas[etapa]
+        pct = max(0.0, min(100.0, float(percentual_local or 0)))
+        return ini + (fim - ini) * pct / 100.0
+
+    def percentual(processados, total):
+        if not total:
+            return 0.0
+        return min(100.0, processados / max(1, total) * 100.0)
+
+    atualizar_job(job_id, etapas=dict(estado_etapas))
+    resultado_final = {"sucesso": True, "fontes": fontes}
+
+    try:
+        # ---------------- 1. COLETA ----------------
+        marcar_etapa("coleta", "rodando")
+        resultados = {}
+        estados = {
+            fonte: {"processados": 0, "total": None, "coletados": 0, "erros": 0, "concluida": False}
+            for fonte in fontes
+        }
+
+        def publicar_coleta(fonte_atual, item="", sub_etapa="coletando"):
+            encontrados = sum(
+                max(int(x.get("total") or 0), int(x.get("processados") or 0))
+                for x in estados.values()
+            )
+            atualizar_job(
+                job_id,
+                etapa="coleta",
+                fonte_atual=fonte_atual,
+                item_atual=item or sub_etapa,
+                progresso=progresso_global("coleta", calcular_progresso_fontes(estados, fontes)),
+                metricas={
+                    "coleta_fontes_total": len(fontes),
+                    "coleta_fontes_concluidas": sum(1 for x in estados.values() if x["concluida"]),
+                    "coleta_encontrados": encontrados,
+                    "coleta_coletados": sum(int(x.get("coletados") or 0) for x in estados.values()),
+                    "coleta_erros": sum(int(x.get("erros") or 0) for x in estados.values()),
+                },
+            )
+
+        for fonte in fontes:
+            publicar_coleta(fonte)
+
+            def progresso_fonte(_fonte=fonte, **dados):
+                estado = estados[_fonte]
+                estado["processados"] = int(dados.get("processados", estado["processados"]) or 0)
+                if dados.get("total") is not None:
+                    estado["total"] = int(dados.get("total") or 0)
+                estado["coletados"] = int(dados.get("coletados", estado["coletados"]) or 0)
+                estado["erros"] = int(dados.get("erros", estado["erros"]) or 0)
+                publicar_coleta(_fonte, dados.get("item", ""), dados.get("etapa", "coletando"))
+
+            try:
+                resultado = executar_coleta_fonte(fonte, progresso=progresso_fonte)
+            except Exception as erro:
+                print(f"[ERRO {fonte.upper()}] {erro}")
+                resultado = erro_coleta(erro)
+
+            resultados[fonte] = resultado
+            estados[fonte]["total"] = int(resultado.get("encontrados", 0) or 0)
+            estados[fonte]["processados"] = estados[fonte]["total"]
+            estados[fonte]["coletados"] = int(
+                resultado.get("coletados", resultado.get("baixados", 0)) or 0
+            )
+            estados[fonte]["erros"] = int(resultado.get("erros", 0) or 0)
+            estados[fonte]["concluida"] = True
+            publicar_coleta(fonte, "concluída")
+
+        consolidado = somar_resultados_coleta(resultados)
+        consolidado.pop("editais", None)
+        resultado_final["coleta"] = consolidado
+        # Uma fonte com erro não impede as próximas etapas: a IA ainda
+        # processa o que já foi coletado das demais (ou de execuções anteriores).
+        marcar_etapa("coleta", "concluida" if consolidado["sucesso"] else "erro")
+
+        # ---------------- 2. MARKDOWN (FAPESC) ----------------
+        if incluir_markdown:
+            marcar_etapa("markdown", "rodando")
+            atualizar_job(job_id, etapa="markdown", fonte_atual="fapesc", item_atual="preparando PDFs")
+
+            def progresso_markdown(**dados):
+                total = int(dados.get("total", 0) or 0)
+                processados = int(dados.get("processados", 0) or 0)
+                atualizar_job(
+                    job_id,
+                    etapa="markdown",
+                    fonte_atual="fapesc",
+                    item_atual=dados.get("item", "") or dados.get("etapa", "convertendo"),
+                    progresso=progresso_global("markdown", percentual(processados, total)),
+                    metricas={
+                        "md_total": total,
+                        "md_processados": processados,
+                        "md_convertidos": int(dados.get("convertidos", 0) or 0),
+                        "md_pulados": int(dados.get("pulados", 0) or 0),
+                        "md_erros": int(dados.get("erros", 0) or 0),
+                    },
+                )
+
+            resultado_md = converter_pdfs(progresso=progresso_markdown)
+            resultado_md.pop("arquivos", None)
+            resultado_final["markdown"] = resultado_md
+            atualizar_job(
+                job_id,
+                progresso=progresso_global("markdown", 100),
+                metricas={
+                    "md_total": int(resultado_md.get("encontrados", 0) or 0),
+                    "md_processados": int(resultado_md.get("encontrados", 0) or 0),
+                    "md_convertidos": int(resultado_md.get("convertidos", 0) or 0),
+                    "md_pulados": int(resultado_md.get("pulados", 0) or 0),
+                    "md_erros": int(resultado_md.get("erros", 0) or 0),
+                },
+            )
+            marcar_etapa("markdown", "concluida")
+
+        # ---------------- 3. IA ----------------
+        marcar_etapa("ia", "rodando")
+        atualizar_job(job_id, etapa="ia", fonte_atual="", item_atual="conectando ao modelo")
+
+        def progresso_ia(**dados):
+            total = int(dados.get("total", 0) or 0)
+            processados = int(dados.get("processados", 0) or 0)
+            fonte_ia = dados.get("etapa", "")
+            atualizar_job(
+                job_id,
+                etapa="ia",
+                fonte_atual=fonte_ia if fonte_ia in ORDEM_FONTES else "",
+                item_atual=dados.get("item", "") or fonte_ia,
+                progresso=progresso_global("ia", percentual(processados, total)),
+                metricas={
+                    "ia_total": total,
+                    "ia_processados": processados,
+                    "ia_analisados": int(dados.get("analisados", 0) or 0),
+                    "ia_pulados": int(dados.get("pulados", 0) or 0),
+                    "ia_erros": int(dados.get("erros", 0) or 0),
+                    "ia_negocios": int(dados.get("negocios", 0) or 0),
+                    "ia_academicos": int(dados.get("academicos", 0) or 0),
+                    "ia_outros": int(dados.get("outros", 0) or 0),
+                },
+            )
+
+        resultado_ia = analisar_fontes(fontes, progresso=progresso_ia)
+        resultado_ia.pop("editais", None)
+        resultado_final["ia"] = resultado_ia
+        marcar_etapa("ia", "concluida")
+
+        atualizar_job(job_id, item_atual="")
+        finalizar_job(job_id, resultado=resultado_final)
+
+    except Exception as erro:
+        for etapa, status in estado_etapas.items():
+            if status == "rodando":
+                estado_etapas[etapa] = "erro"
+        atualizar_job(job_id, etapas=dict(estado_etapas))
+        finalizar_job(job_id, erro=erro)
+
+
 def iniciar_thread(target, *args):
     def executar_serializado():
         with EXECUTION_LOCK:
@@ -550,6 +736,17 @@ def iniciar_job_coleta():
     if ocupado:
         return resposta_ocupado(ocupado)
     iniciar_thread(worker_coleta, job_id, fontes)
+    return jsonify({"sucesso": True, "job_id": job_id, "fontes": fontes})
+
+
+@app.route("/api/jobs/pipeline", methods=["POST"])
+def iniciar_job_pipeline():
+    dados = request.get_json(silent=True) or {}
+    fontes = fontes_da_requisicao(dados)
+    job_id, ocupado = criar_job_exclusivo("pipeline", fontes)
+    if ocupado:
+        return resposta_ocupado(ocupado)
+    iniciar_thread(worker_pipeline, job_id, fontes)
     return jsonify({"sucesso": True, "job_id": job_id, "fontes": fontes})
 
 

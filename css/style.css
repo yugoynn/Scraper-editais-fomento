@@ -720,9 +720,11 @@ tbody tr:hover {
   background: rgba(255, 90, 90, .08);
 }
 
-.sync-banner.sync-error strong,
-.sync-banner.sync-error .sync-dot {
+.sync-banner.sync-error strong {
   color: var(--danger);
+}
+
+.sync-banner.sync-error .sync-dot {
   background: var(--danger);
 }
 
@@ -1063,4 +1065,83 @@ a {
   .nav-tab {
     font-size: 10px;
   }
+}
+
+/* =========================================================
+   INTERFACE SIMPLIFICADA // ETAPAS DO PROCESSO
+   ========================================================= */
+
+.collect-btn-secondary {
+  border-color: var(--green-dim);
+  color: var(--green-soft);
+  background: transparent;
+}
+
+.collect-btn:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.stage-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.stage {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line-soft);
+  opacity: .55;
+  transition: opacity .2s ease, background .2s ease;
+}
+
+.stage.is-running {
+  opacity: 1;
+  background: rgba(85, 255, 214, .06);
+  box-shadow: inset 3px 0 0 var(--green);
+}
+
+.stage.is-done,
+.stage.is-error {
+  opacity: 1;
+}
+
+.stage.is-skipped {
+  opacity: .3;
+}
+
+.stage-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.stage-name {
+  color: var(--green);
+  letter-spacing: .04em;
+}
+
+.stage-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.stage-counts b {
+  color: var(--text);
+  font-weight: 400;
+  font-size: 13px;
+}
+
+.badge.running {
+  color: var(--warning);
+}
+
+#currentItem {
+  overflow-wrap: anywhere;
 }

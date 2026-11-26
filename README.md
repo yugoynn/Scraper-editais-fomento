@@ -16,12 +16,12 @@ flowchart LR
     E -->|XlsxWriter| F[Planilha Excel]
 ```
 
-O painel web tem quatro etapas, cada uma com telemetria ao vivo:
+No painel web você escolhe as fontes e usa só dois botões: **Iniciar**, que roda coleta, Markdown (FAPESC) e IA em sequência, e **Exportar planilha**. A tela mostra ao vivo em qual etapa o processo está e as quantidades de cada uma:
 
 | Etapa | O que acontece |
 |---|---|
-| **Coletor** | Escolha as fontes e rode a coleta. Sites estáticos usam `requests` + `BeautifulSoup`; sites que dependem de JavaScript (filtros, cards dinâmicos) usam **Playwright** com um navegador real. Há cache para não baixar de novo o que já foi coletado. |
-| **Markdown** | Os PDFs dos editais da FAPESC são convertidos em Markdown com `pymupdf4llm`, deixando o texto pronto para a IA. |
+| **Coleta** | Busca as oportunidades nas fontes escolhidas. Sites estáticos usam `requests` + `BeautifulSoup`; sites que dependem de JavaScript (filtros, cards dinâmicos) usam **Playwright** com um navegador real. Há cache para não baixar de novo o que já foi coletado. |
+| **Markdown** | Só quando a FAPESC está selecionada: os PDFs dos editais da FAPESC são convertidos em Markdown com `pymupdf4llm`, deixando o texto pronto para a IA. |
 | **IA** | Um modelo local (Qwen 3.5 9B no Ollama) identifica **quem pode submeter**, classifica o edital, extrai público-alvo e prazo, marca setores e escreve um resumo curto. Nada é enviado para APIs externas. |
 | **Exportar** | Gera `editais_fomento.xlsx` com título, prazo, resumo, classificação, marcação de startups, setores, público-alvo, fonte, data de coleta e links para a página e o PDF do edital. |
 
@@ -113,6 +113,7 @@ Abra **http://127.0.0.1:5000**. No Windows, também dá para usar os atalhos: `C
 
 | Método | Rota | Descrição |
 |---|---|---|
+| `POST` | `/api/jobs/pipeline` | Botão **Iniciar**: coleta, Markdown da FAPESC (se selecionada) e IA em sequência (`{"fontes": [...]}`) |
 | `POST` | `/api/jobs/coleta` | Inicia a coleta (`{"fontes": ["finep", "bndes"]}` ou `["todos"]`) |
 | `POST` | `/api/jobs/markdown` | Converte os PDFs da FAPESC em Markdown |
 | `POST` | `/api/jobs/ia` | Roda a análise com IA nas fontes escolhidas |

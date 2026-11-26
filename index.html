@@ -32,636 +32,149 @@
       </div>
     </header>
 
-    <nav class="nav-tabs">
-      <button id="tabCollector" class="nav-tab active">COLETOR</button>
-      <button id="tabMarkdown" class="nav-tab">MARKDOWN</button>
-      <button id="tabIA" class="nav-tab">IA</button>
-      <button id="tabExport" class="nav-tab">EXPORTAR</button>
-    </nav>
-
     <div id="globalSyncBanner" class="sync-banner" hidden>
       <span class="sync-dot" aria-hidden="true"></span>
       <strong id="globalSyncTitle">PROCESSO COMPARTILHADO</strong>
       <span id="globalSyncText">Acompanhando operação em andamento na rede.</span>
     </div>
 
-    <div id="collectorScreen">
+    <section class="hero-grid">
 
-      <section class="hero-grid">
+      <article class="panel control-panel">
 
-        <article class="panel control-panel">
+        <div class="panel-title">
+          <span>01 // CONTROLE</span>
+          <span id="collectorNodeLabel">FAPESC_NODE</span>
+        </div>
 
-          <div class="panel-title">
-            <span>01 // CONTROLE DE COLETA</span>
-            <span id="collectorNodeLabel">FAPESC_NODE</span>
-          </div>
-
-          <div class="ascii-title" aria-hidden="true">
+        <div class="ascii-title" aria-hidden="true">
 <pre id="collectorAsciiLabel">FAPESC // COLETOR</pre>
-          </div>
+        </div>
 
-          <div class="field-grid">
+        <div class="field-grid">
 
-            <div class="terminal-field field-wide">
-              <span class="field-label">FONTES // COMBINAÇÃO PERSONALIZADA</span>
-              <div id="sourceChecklist" class="source-checklist">
-                <label><input class="source-check" type="checkbox" value="fapesc" checked> FAPESC</label>
-                <label><input class="source-check" type="checkbox" value="sebrae"> SEBRAE</label>
-                <label><input class="source-check" type="checkbox" value="finep"> FINEP</label>
-                <label><input class="source-check" type="checkbox" value="fapesp"> FAPESP</label>
-                <label><input class="source-check" type="checkbox" value="bndes"> BNDES</label>
-                <label><input class="source-check" type="checkbox" value="fapeam"> FAPEAM</label>
-                <label><input class="source-check" type="checkbox" value="fapemig"> FAPEMIG</label>
-                <label><input class="source-check" type="checkbox" value="fappr"> FUNDAÇÃO ARAUCÁRIA</label>
-                <label><input class="source-check" type="checkbox" value="petrobras"> PETROBRAS</label>
-                <label><input class="source-check" type="checkbox" value="rota_fomento"> ROTA DO FOMENTO</label>
-              </div>
-              <div class="source-actions">
-                <button id="selectAllSources" type="button" class="mini-terminal-btn">SELECIONAR TODAS</button>
-                <button id="clearSources" type="button" class="mini-terminal-btn">LIMPAR</button>
-                <strong id="selectedSourcesCount">01/10</strong>
-              </div>
+          <div class="terminal-field field-wide">
+            <span class="field-label">FONTES</span>
+            <div id="sourceChecklist" class="source-checklist">
+              <label><input class="source-check" type="checkbox" value="fapesc" checked> FAPESC</label>
+              <label><input class="source-check" type="checkbox" value="sebrae"> SEBRAE</label>
+              <label><input class="source-check" type="checkbox" value="finep"> FINEP</label>
+              <label><input class="source-check" type="checkbox" value="fapesp"> FAPESP</label>
+              <label><input class="source-check" type="checkbox" value="bndes"> BNDES</label>
+              <label><input class="source-check" type="checkbox" value="fapeam"> FAPEAM</label>
+              <label><input class="source-check" type="checkbox" value="fapemig"> FAPEMIG</label>
+              <label><input class="source-check" type="checkbox" value="fappr"> FUNDAÇÃO ARAUCÁRIA</label>
+              <label><input class="source-check" type="checkbox" value="petrobras"> PETROBRAS</label>
+              <label><input class="source-check" type="checkbox" value="rota_fomento"> ROTA DO FOMENTO</label>
             </div>
-
-            <div class="terminal-field">
-              <span class="field-label">MODO</span>
-              <strong id="collectorModeValue">DOWNLOAD DE EDITAIS</strong>
-            </div>
-
-            <div class="terminal-field field-wide">
-              <span class="field-label">DESTINO</span>
-              <strong id="collectorDestinationValue">/dados/fapesc/pdf/</strong>
-            </div>
-
-            <div class="terminal-field">
-              <span class="field-label">STATUS</span>
-              <strong id="statusText" class="status-ready">PRONTO</strong>
-            </div>
-
-            <div class="terminal-field">
-              <span class="field-label">ÚLTIMA EXECUÇÃO</span>
-              <strong id="lastRun">--/--/---- --:--</strong>
-            </div>
-
-            <div class="terminal-field">
-              <span class="field-label">CRONÔMETRO</span>
-              <strong id="collectorElapsed">00:00:00.0</strong>
-            </div>
-
-          </div>
-
-          <button id="collectBtn" class="collect-btn">
-            <span class="btn-prefix">&gt;</span>
-            <span id="collectBtnLabel">INICIAR COLETA FAPESC</span>
-            <span class="cursor">_</span>
-          </button>
-
-          <div class="progress-wrap">
-            <div class="progress-meta">
-              <span>PROGRESSO</span>
-              <span id="progressLabel">0%</span>
-            </div>
-
-            <div class="progress-track">
-              <div id="progressBar" class="progress-bar"></div>
+            <div class="source-actions">
+              <button id="selectAllSources" type="button" class="mini-terminal-btn">SELECIONAR TODAS</button>
+              <button id="clearSources" type="button" class="mini-terminal-btn">LIMPAR</button>
+              <strong id="selectedSourcesCount">01/10</strong>
             </div>
           </div>
 
-        </article>
-
-        <aside class="panel telemetry-panel">
-
-          <div class="panel-title">
-            <span>02 // TELEMETRIA</span>
-            <span>LIVE</span>
+          <div class="terminal-field">
+            <span class="field-label">STATUS</span>
+            <strong id="statusText" class="status-ready">PRONTO</strong>
           </div>
 
-          <div class="big-number">
-            <span id="foundCount">000</span>
-            <small>OPORTUNIDADES ENCONTRADAS</small>
+          <div class="terminal-field">
+            <span class="field-label">CRONÔMETRO</span>
+            <strong id="elapsedText">00:00:00.0</strong>
           </div>
 
-          <div class="metrics">
+        </div>
 
-            <div class="metric">
-              <span class="metric-value" id="downloadedCount">000</span>
-              <span class="metric-label" id="processedMetricLabel">BAIXADOS</span>
-            </div>
+        <button id="startBtn" class="collect-btn">
+          <span class="btn-prefix">&gt;</span>
+          <span id="startBtnLabel">INICIAR</span>
+          <span class="cursor">_</span>
+        </button>
 
-            <div class="metric">
-              <span class="metric-value" id="errorCount">000</span>
-              <span class="metric-label">ERROS</span>
-            </div>
+        <button id="exportBtn" class="collect-btn collect-btn-secondary">
+          <span class="btn-prefix">&gt;</span>
+          EXPORTAR PLANILHA
+          <span class="cursor">_</span>
+        </button>
 
+        <div class="progress-wrap">
+          <div class="progress-meta">
+            <span>PROGRESSO GERAL</span>
+            <span id="progressLabel">0%</span>
           </div>
-
-          <div class="signal-box" aria-hidden="true">
-            <div class="signal-line line-1"></div>
-            <div class="signal-line line-2"></div>
-            <div class="signal-line line-3"></div>
-            <div class="signal-line line-4"></div>
-            <div class="signal-line line-5"></div>
-            <div class="signal-line line-6"></div>
-            <div class="signal-line line-7"></div>
-            <div class="signal-line line-8"></div>
-            <div class="signal-line line-9"></div>
+          <div class="progress-track">
+            <div id="progressBar" class="progress-bar"></div>
           </div>
+        </div>
 
-          <div class="telemetry-copy">
-            <p><span>&gt;</span> aguardando instrução...</p>
-            <p id="collectorScraperStatus"><span>&gt;</span> scraper_fapesc: standby</p>
-            <p><span>&gt;</span> filesystem: ready</p>
-          </div>
+      </article>
 
-        </aside>
-
-      </section>
-
-      <section class="panel list-panel">
+      <aside class="panel telemetry-panel">
 
         <div class="panel-title">
-          <span>03 // OPORTUNIDADES COLETADAS</span>
-          <span id="tableCount">000 REGISTROS</span>
+          <span>02 // ETAPAS</span>
+          <span>LIVE</span>
         </div>
 
-        <div class="table-wrap">
+        <ol id="stageList" class="stage-list">
+          <li class="stage" data-stage="coleta">
+            <div class="stage-head">
+              <span class="stage-name">1. COLETA DOS SITES</span>
+              <span class="badge standby" data-role="status">AGUARDANDO</span>
+            </div>
+            <div class="stage-counts">
+              <span><b data-count="coleta_fontes">0/0</b> fontes</span>
+              <span><b data-count="coleta_encontrados">0</b> encontrados</span>
+              <span><b data-count="coleta_coletados">0</b> coletados</span>
+              <span><b data-count="coleta_erros">0</b> erros</span>
+            </div>
+          </li>
+          <li class="stage" data-stage="markdown">
+            <div class="stage-head">
+              <span class="stage-name">2. PDF → MARKDOWN (FAPESC)</span>
+              <span class="badge standby" data-role="status">AGUARDANDO</span>
+            </div>
+            <div class="stage-counts">
+              <span><b data-count="md_progresso">0/0</b> PDFs</span>
+              <span><b data-count="md_convertidos">0</b> convertidos</span>
+              <span><b data-count="md_pulados">0</b> já existiam</span>
+              <span><b data-count="md_erros">0</b> erros</span>
+            </div>
+          </li>
+          <li class="stage" data-stage="ia">
+            <div class="stage-head">
+              <span class="stage-name">3. ANÁLISE E RESUMO COM IA</span>
+              <span class="badge standby" data-role="status">AGUARDANDO</span>
+            </div>
+            <div class="stage-counts">
+              <span><b data-count="ia_progresso">0/0</b> itens</span>
+              <span><b data-count="ia_analisados">0</b> analisados</span>
+              <span><b data-count="ia_negocios">0</b> negócios</span>
+              <span><b data-count="ia_academicos">0</b> acadêmicos</span>
+              <span><b data-count="ia_outros">0</b> outros</span>
+              <span><b data-count="ia_erros">0</b> erros</span>
+            </div>
+          </li>
+          <li class="stage" data-stage="exportar">
+            <div class="stage-head">
+              <span class="stage-name">PLANILHA</span>
+              <span class="badge standby" data-role="status">AGUARDANDO</span>
+            </div>
+            <div class="stage-counts">
+              <span><b data-count="exp_progresso">0/0</b> editais exportados</span>
+            </div>
+          </li>
+        </ol>
 
-          <table>
-
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>TÍTULO / ARQUIVO</th>
-                <th>PÁGINA DE ORIGEM</th>
-                <th>STATUS</th>
-              </tr>
-            </thead>
-
-            <tbody id="resultTable">
-              <tr class="empty-row">
-                <td>--</td>
-                <td>NENHUM EDITAL COLETADO</td>
-                <td>AGUARDANDO EXECUÇÃO</td>
-                <td><span class="badge standby">STANDBY</span></td>
-              </tr>
-            </tbody>
-
-          </table>
-
+        <div class="telemetry-copy">
+          <p id="currentSource"><span>&gt;</span> fonte: --</p>
+          <p id="currentItem"><span>&gt;</span> aguardando instrução...</p>
         </div>
 
-      </section>
+      </aside>
 
-    </div>
-
-    <div id="markdownScreen" style="display: none;">
-
-      <section class="hero-grid">
-
-        <article class="panel control-panel">
-
-          <div class="panel-title">
-            <span>01 // PDF TO MARKDOWN</span>
-            <span>PYMUPDF4LLM</span>
-          </div>
-
-          <div class="ascii-title" aria-hidden="true">
-<pre>
-███╗   ███╗ █████╗ ██████╗ ██╗  ██╗██████╗  ██████╗ ██╗    ██╗███╗   ██╗
-████╗ ████║██╔══██╗██╔══██╗██║ ██╔╝██╔══██╗██╔═══██╗██║    ██║████╗  ██║
-██╔████╔██║███████║██████╔╝█████╔╝ ██║  ██║██║   ██║██║ █╗ ██║██╔██╗ ██║
-██║╚██╔╝██║██╔══██║██╔══██╗██╔═██╗ ██║  ██║██║   ██║██║███╗██║██║╚██╗██║
-██║ ╚═╝ ██║██║  ██║██║  ██║██║  ██╗██████╔╝╚██████╔╝╚███╔███╔╝██║ ╚████║
-╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝  ╚═════╝  ╚══╝╚══╝ ╚═╝  ╚═══╝
-</pre>
-          </div>
-
-          <div class="field-grid">
-
-            <div class="terminal-field">
-              <span class="field-label">ENTRADA</span>
-              <strong>/dados/fapesc/pdf/</strong>
-            </div>
-
-            <div class="terminal-field">
-              <span class="field-label">SAÍDA</span>
-              <strong>/dados/fapesc/markdown/</strong>
-            </div>
-
-            <div class="terminal-field">
-              <span class="field-label">STATUS</span>
-              <strong id="markdownStatus" class="status-ready">PRONTO</strong>
-            </div>
-
-            <div class="terminal-field">
-              <span class="field-label">CONVERSOR</span>
-              <strong>PyMuPDF4LLM</strong>
-            </div>
-
-            <div class="terminal-field">
-              <span class="field-label">CRONÔMETRO</span>
-              <strong id="markdownElapsed">00:00:00.0</strong>
-            </div>
-
-          </div>
-
-          <button id="markdownBtn" class="collect-btn">
-            <span class="btn-prefix">&gt;</span>
-            CONVERTER PDF → MARKDOWN
-            <span class="cursor">_</span>
-          </button>
-
-          <div class="progress-wrap">
-
-            <div class="progress-meta">
-              <span>PROGRESSO</span>
-              <span id="markdownProgress">0%</span>
-            </div>
-
-            <div class="progress-track">
-              <div id="markdownProgressBar" class="progress-bar"></div>
-            </div>
-
-          </div>
-
-        </article>
-
-        <aside class="panel telemetry-panel">
-
-          <div class="panel-title">
-            <span>02 // CONVERSÃO</span>
-            <span>LIVE</span>
-          </div>
-
-          <div class="big-number">
-            <span id="markdownConverted">000</span>
-            <small>MARKDOWNS GERADOS</small>
-          </div>
-
-          <div class="metrics">
-
-            <div class="metric">
-              <span id="markdownFound" class="metric-value">000</span>
-              <span class="metric-label">PDFs ENCONTRADOS</span>
-            </div>
-
-            <div class="metric">
-              <span id="markdownErrors" class="metric-value">000</span>
-              <span class="metric-label">ERROS</span>
-            </div>
-
-          </div>
-
-          <div class="signal-box" aria-hidden="true">
-            <div class="signal-line line-1"></div>
-            <div class="signal-line line-2"></div>
-            <div class="signal-line line-3"></div>
-            <div class="signal-line line-4"></div>
-            <div class="signal-line line-5"></div>
-            <div class="signal-line line-6"></div>
-            <div class="signal-line line-7"></div>
-            <div class="signal-line line-8"></div>
-            <div class="signal-line line-9"></div>
-          </div>
-
-          <div class="telemetry-copy">
-            <p><span>&gt;</span> converter: standby</p>
-            <p><span>&gt;</span> engine: pymupdf4llm</p>
-            <p><span>&gt;</span> output: markdown</p>
-          </div>
-
-        </aside>
-
-      </section>
-
-      <section class="panel list-panel">
-
-        <div class="panel-title">
-          <span>03 // ARQUIVOS CONVERTIDOS</span>
-          <span id="markdownTableCount">000 REGISTROS</span>
-        </div>
-
-        <div class="table-wrap">
-
-          <table>
-
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>PDF ORIGINAL</th>
-                <th>MARKDOWN</th>
-                <th>STATUS</th>
-              </tr>
-            </thead>
-
-            <tbody id="markdownTable">
-              <tr class="empty-row">
-                <td>--</td>
-                <td>NENHUM PDF CONVERTIDO</td>
-                <td>AGUARDANDO EXECUÇÃO</td>
-                <td><span class="badge standby">STANDBY</span></td>
-              </tr>
-            </tbody>
-
-          </table>
-
-        </div>
-
-      </section>
-
-    </div>
-
-    <div id="iaScreen" style="display: none;">
-
-      <section class="hero-grid">
-
-        <article class="panel control-panel">
-
-          <div class="panel-title">
-            <span>01 // INTELIGÊNCIA ARTIFICIAL</span>
-            <span>OLLAMA_NODE</span>
-          </div>
-
-          <div class="ascii-title" aria-hidden="true">
-<pre>
-██╗ █████╗
-██║██╔══██╗
-██║███████║
-██║██╔══██║
-██║██║  ██║
-╚═╝╚═╝  ╚═╝
-</pre>
-          </div>
-
-          <div class="field-grid">
-
-            <div class="terminal-field">
-              <span class="field-label">MODELO</span>
-              <strong>QWEN3.5:9B</strong>
-            </div>
-
-            <div class="terminal-field">
-              <span class="field-label">MOTOR</span>
-              <strong>OLLAMA LOCAL</strong>
-            </div>
-
-            <div class="terminal-field field-wide">
-              <span class="field-label">ENTRADA</span>
-              <strong>/dados/fapesc/markdown/ + /dados/*/*.json</strong>
-            </div>
-
-            <div class="terminal-field field-wide">
-              <span class="field-label">SAÍDA</span>
-              <strong>/dados/*/analisados/</strong>
-            </div>
-
-            <div class="terminal-field">
-              <span class="field-label">STATUS</span>
-              <strong id="iaStatus" class="status-ready">PRONTO</strong>
-            </div>
-
-            <div class="terminal-field">
-              <span class="field-label">MODO</span>
-              <strong>ANÁLISE + REESCRITA</strong>
-            </div>
-
-            <div class="terminal-field">
-              <span class="field-label">CRONÔMETRO</span>
-              <strong id="iaElapsed">00:00:00.0</strong>
-            </div>
-
-          </div>
-
-          <button id="iaBtn" class="collect-btn">
-            <span class="btn-prefix">&gt;</span>
-            ANALISAR EDITAIS
-            <span class="cursor">_</span>
-          </button>
-
-          <div class="progress-wrap">
-
-            <div class="progress-meta">
-              <span>PROGRESSO</span>
-              <span id="iaProgress">0%</span>
-            </div>
-
-            <div class="progress-track">
-              <div id="iaProgressBar" class="progress-bar"></div>
-            </div>
-
-          </div>
-
-        </article>
-
-        <aside class="panel telemetry-panel">
-
-          <div class="panel-title">
-            <span>02 // ANÁLISE</span>
-            <span>AI</span>
-          </div>
-
-          <div class="big-number">
-            <span id="iaAnalyzed">000</span>
-            <small>ITENS PROCESSADOS</small>
-          </div>
-
-          <div class="metrics">
-
-            <div class="metric">
-              <span id="iaCompanies" class="metric-value">000</span>
-              <span class="metric-label">NEGÓCIOS</span>
-            </div>
-
-            <div class="metric">
-              <span id="iaAcademic" class="metric-value">000</span>
-              <span class="metric-label">ACADÊMICO</span>
-            </div>
-
-          </div>
-
-          <div class="metrics">
-
-            <div class="metric">
-              <span id="iaMixed" class="metric-value">000</span>
-              <span class="metric-label">OUTRO</span>
-            </div>
-
-            <div class="metric">
-              <span id="iaErrors" class="metric-value">000</span>
-              <span class="metric-label">ERROS</span>
-            </div>
-
-          </div>
-
-          <div class="signal-box" aria-hidden="true">
-            <div class="signal-line line-1"></div>
-            <div class="signal-line line-2"></div>
-            <div class="signal-line line-3"></div>
-            <div class="signal-line line-4"></div>
-            <div class="signal-line line-5"></div>
-            <div class="signal-line line-6"></div>
-            <div class="signal-line line-7"></div>
-            <div class="signal-line line-8"></div>
-            <div class="signal-line line-9"></div>
-          </div>
-
-          <div class="telemetry-copy">
-            <p><span>&gt;</span> ollama: localhost:11434</p>
-            <p><span>&gt;</span> model: qwen3.5:9b</p>
-            <p><span>&gt;</span> sebrae: reescrita de resumo</p>
-            <p><span>&gt;</span> finep: resumo por tipo de página</p>
-            <p><span>&gt;</span> fapesp: classificação igual à fapesc</p>
-          </div>
-
-        </aside>
-
-      </section>
-
-      <section class="panel list-panel">
-
-        <div class="panel-title">
-          <span>03 // RESULTADO DA IA / REESCRITA</span>
-          <span id="iaTableCount">000 REGISTROS</span>
-        </div>
-
-        <div class="table-wrap">
-
-          <table>
-
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>TÍTULO / RESUMO</th>
-                <th>PRAZO</th>
-                <th>CLASSIFICAÇÃO</th>
-                <th>PÚBLICO-ALVO</th>
-              </tr>
-            </thead>
-
-            <tbody id="iaTable">
-              <tr class="empty-row">
-                <td>--</td>
-                <td>NENHUMA OPORTUNIDADE PROCESSADA</td>
-                <td>--</td>
-                <td><span class="badge standby">STANDBY</span></td>
-                <td>AGUARDANDO EXECUÇÃO</td>
-              </tr>
-            </tbody>
-
-          </table>
-
-        </div>
-
-      </section>
-
-    </div>
-
-
-    <div id="exportScreen" style="display: none;">
-
-      <section class="hero-grid">
-
-        <article class="panel control-panel">
-
-          <div class="panel-title">
-            <span>01 // EXPORTAÇÃO</span>
-            <span>XLSX_NODE</span>
-          </div>
-
-          <div class="ascii-title" aria-hidden="true">
-<pre>
-███████╗██╗  ██╗ ██████╗███████╗██╗
-██╔════╝╚██╗██╔╝██╔════╝██╔════╝██║
-█████╗   ╚███╔╝ ██║     █████╗  ██║
-██╔══╝   ██╔██╗ ██║     ██╔══╝  ██║
-███████╗██╔╝ ██╗╚██████╗███████╗███████╗
-╚══════╝╚═╝  ╚═╝ ╚═════╝╚══════╝╚══════╝
-</pre>
-          </div>
-
-          <div class="field-grid">
-
-            <div class="terminal-field">
-              <span class="field-label">ENTRADA</span>
-              <strong>analises.json</strong>
-            </div>
-
-            <div class="terminal-field">
-              <span class="field-label">FORMATO</span>
-              <strong>EXCEL (.XLSX)</strong>
-            </div>
-
-            <div class="terminal-field field-wide">
-              <span class="field-label">DESTINO</span>
-              <strong>/dados/exportados/</strong>
-            </div>
-
-            <div class="terminal-field">
-              <span class="field-label">STATUS</span>
-              <strong id="exportStatus" class="status-ready">PRONTO</strong>
-            </div>
-
-            <div class="terminal-field">
-              <span class="field-label">CRONÔMETRO</span>
-              <strong id="exportElapsed">00:00:00.0</strong>
-            </div>
-
-          </div>
-
-          <button id="exportBtn" class="collect-btn">
-            <span class="btn-prefix">&gt;</span>
-            EXPORTAR PLANILHA
-            <span class="cursor">_</span>
-          </button>
-
-          <div class="progress-wrap">
-            <div class="progress-meta">
-              <span>EXPORTAÇÃO</span>
-              <span id="exportProgress">0%</span>
-            </div>
-
-            <div class="progress-track">
-              <div id="exportProgressBar" class="progress-bar"></div>
-            </div>
-          </div>
-
-        </article>
-
-        <aside class="panel telemetry-panel">
-
-          <div class="panel-title">
-            <span>02 // ARQUIVO</span>
-            <span>XLSX</span>
-          </div>
-
-          <div class="big-number">
-            <span id="exportedCount">000</span>
-            <small>REGISTROS EXPORTADOS</small>
-          </div>
-
-          <div class="metrics">
-            <div class="metric">
-              <span id="exportFound" class="metric-value">000</span>
-              <span class="metric-label">REGISTROS TOTAIS</span>
-            </div>
-            <div class="metric">
-              <span id="exportErrors" class="metric-value">000</span>
-              <span class="metric-label">ERROS</span>
-            </div>
-          </div>
-
-          <div class="telemetry-copy">
-            <p><span>&gt;</span> source: analises.json</p>
-            <p><span>&gt;</span> format: xlsx</p>
-            <p><span>&gt;</span> filters: enabled</p>
-            <p><span>&gt;</span> links: enabled</p>
-          </div>
-
-        </aside>
-
-      </section>
-
-    </div>
+    </section>
 
     <footer class="footer">
       <span>FOMENTO_OS // LOCAL RESEARCH NODE</span>
